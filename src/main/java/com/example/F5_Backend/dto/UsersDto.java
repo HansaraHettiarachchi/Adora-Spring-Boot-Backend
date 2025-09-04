@@ -3,6 +3,7 @@ package com.example.F5_Backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;

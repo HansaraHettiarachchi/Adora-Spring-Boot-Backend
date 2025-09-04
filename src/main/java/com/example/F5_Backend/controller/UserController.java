@@ -1,39 +1,35 @@
 package com.example.F5_Backend.controller;
 
 import com.example.F5_Backend.dto.UsersDto;
-import com.example.F5_Backend.service.impl.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.F5_Backend.service.UserService;
+import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserServiceImpl userServiceImpl;
-
-//    @PostMapping("/update-user")
-//    public ResponseEntity<?> updateUser(@RequestPart("data") UsersDto usersDto, @RequestPart(value = "image", required = false) MultipartFile image) {
-//
-//        Map<String, String> errors = validateUserDto(usersDto);
-//        if (!errors.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-//        }
-//        return null;
-//    }
-
+    private final UserService userService;
+    private final Gson gson;
 
     @PostMapping("/update-user")
-    public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String token) {
-        System.out.println("Received token: " + token); // or use a logger
-        return ResponseEntity.ok().body(Map.of("token", token));
+    public ResponseEntity<?> updateUser(@RequestParam(value = "data") String data, @RequestParam(value = "image", required = false) MultipartFile image) {
+        UsersDto usersDto = gson.fromJson(data, UsersDto.class);
+
+        Map<String, String> errors = validateUserDto(usersDto);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        }
+
+        return userService.updateUser(usersDto, image);
     }
 
 
@@ -43,7 +39,7 @@ public class UserController {
         if (!errors.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
-        return userServiceImpl.setUser(usersDto);
+        return userService.setUser(usersDto);
     }
 
     private Map<String, String> validateUserDto(UsersDto usersDto) {

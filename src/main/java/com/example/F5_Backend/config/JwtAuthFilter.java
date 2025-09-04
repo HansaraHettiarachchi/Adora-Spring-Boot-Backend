@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -25,9 +24,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/users/set-user",
-            "/api/auth/login",
-            "/api/users/login"
+            "/api/auth/login"
     );
+
     @Autowired
     CustomUserDetailsService userDetailsService;
 
@@ -39,9 +38,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI().replaceFirst(request.getContextPath(), "");
 
-        // Skip authentication for public endpoints
         if (EXCLUDED_PATHS.stream().anyMatch(path::equalsIgnoreCase)
-            || path.startsWith("/images/profileImgs/")) {
+            || path.startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,21 +62,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (JwtException e) {
-                // invalid token → stop and return 401
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
                 return;
             }
         } else {
-            // missing token → stop and return 401
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Authorization token missing\"}");
             return;
         }
 
-        // ✅ continue filter chain only once, at the end
         filterChain.doFilter(request, response);
     }
 }

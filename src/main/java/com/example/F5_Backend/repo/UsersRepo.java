@@ -17,4 +17,7 @@ public interface UsersRepo extends JpaRepository<Users, Integer> {
 
     Optional<Users> findByEmail(@NotNull @Size(max = 100) @Email String email);
 
+    Users findByMobile(@NotNull @Size(max = 20) String mobile);
+
+    Users findByNic(@Size(max = 20) @NotNull String nic);
 }

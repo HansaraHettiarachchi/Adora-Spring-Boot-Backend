@@ -33,7 +33,15 @@ public class SecurityConfig {
                 .cors(cors -> {
                 })
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/set-user", "/api/auth/login").permitAll()
+                        .requestMatchers(
+                                "/api/users/login",
+                                "/api/users/set-user",
+                                "/api/auth/login",
+                                "/uploads/**",
+                                "/f5_backend/**",
+                                "/images/**",
+                                "/profileImages/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
