@@ -14,6 +14,7 @@ import lombok.*;
 @Table(name = "grn_items")
 public class GrnItem {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 

@@ -15,6 +15,7 @@ import lombok.*;
 @Table(name = "card_details")
 public class CardDetail {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
