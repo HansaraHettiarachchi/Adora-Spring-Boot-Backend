@@ -1,6 +1,8 @@
 package com.example.F5_Backend.service.impl;
 
 import com.example.F5_Backend.dto.BatchDto;
+import com.example.F5_Backend.dto.ProductDto;
+import com.example.F5_Backend.dto.SizeDto;
 import com.example.F5_Backend.entities.Batch;
 import com.example.F5_Backend.entities.Grn;
 import com.example.F5_Backend.entities.GrnItem;
@@ -21,10 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -126,6 +125,86 @@ public class BatchServiceImpl implements BatchService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> getBatchesByProductId(Integer productId) {
+        try {
+            List<Batch> batches = batchRepo.findAll();
+            List<Map<String, Object>> batchDtos = new ArrayList<>();
+            for (Batch batch : batches) {
+                if (batch.getProduct() != null && batch.getProduct().getId().equals(productId)) {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", batch.getId());
+                    dto.put("qty", batch.getQty());
+                    dto.put("price", batch.getPrice());
+                    dto.put("cost", batch.getCost());
+                    dto.put("desc", batch.getDesc());
+                    dto.put("product_id", batch.getProduct().getId());
+                    dto.put("size_id", batch.getSize().getId());
+                    dto.put("code", batch.getCode());
+
+                    List<ProductImage> images = productImageRepo.findAllByBatch(batch);
+                    List<Map<String, Object>> imageDtos = new ArrayList<>();
+                    for (ProductImage img : images) {
+                        Map<String, Object> imgDto = new HashMap<>();
+                        imgDto.put("id", img.getId());
+                        imgDto.put("name", img.getName());
+                        imgDto.put("batch_id", batch.getId());
+                        imageDtos.add(imgDto);
+                    }
+                    dto.put("product_images", imageDtos);
+
+                    dto.put("product", modelMapper.map(batch.getProduct(), ProductDto.class));
+
+                    dto.put("size", modelMapper.map(batch.getSize(), SizeDto.class));
+                    batchDtos.add(dto);
+                }
+            }
+            if (batchDtos.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("status", 404, "message", "No batches found", "data", new ArrayList<>()));
+            }
+            return ResponseEntity.ok(Map.of("status", 200, "message", "Batches fetched successfully", "data", batchDtos));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error"));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getBatchById(Integer batchId) {
+        try {
+            Batch batch = batchRepo.findById(batchId).orElse(null);
+            if (batch == null) {
+                return ResponseEntity.status(404).body(Map.of("status", 404, "message", "Batch not found", "data", null));
+            }
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", batch.getId());
+            dto.put("qty", batch.getQty());
+            dto.put("price", batch.getPrice());
+            dto.put("cost", batch.getCost());
+            dto.put("desc", batch.getDesc());
+            dto.put("product_id", batch.getProduct().getId());
+            dto.put("size_id", batch.getSize().getId());
+            dto.put("code", batch.getCode());
+
+            List<ProductImage> images = productImageRepo.findAllByBatch(batch);
+            List<Map<String, Object>> imageDtos = new ArrayList<>();
+            for (ProductImage img : images) {
+                Map<String, Object> imgDto = new java.util.HashMap<>();
+                imgDto.put("id", img.getId());
+                imgDto.put("name", img.getName());
+                imgDto.put("batch_id", batch.getId());
+                imageDtos.add(imgDto);
+            }
+            dto.put("product_images", imageDtos);
+            dto.put("product", modelMapper.map(batch.getProduct(), ProductDto.class));
+            // Size
+            dto.put("size", modelMapper.map(batch.getSize(), SizeDto.class));
+            return ResponseEntity.ok(Map.of("status", 200, "message", "Batch fetched successfully", "data", dto));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error", "error", e.getMessage()));
+        }
+    }
+
     private void deleteExistingImages(List<ProductImage> productImages) {
         for (ProductImage productImage : productImages) {
             String stringPath = relativePath + productImage.getName().replace("/uploads", "");
@@ -172,4 +251,3 @@ public class BatchServiceImpl implements BatchService {
 
 
 }
-

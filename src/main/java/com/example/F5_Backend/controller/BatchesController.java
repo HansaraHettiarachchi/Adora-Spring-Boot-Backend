@@ -23,23 +23,23 @@ public class BatchesController {
      * @route POST /api/batches/set-stock
      * @description Set or update stock (batch)
      * @access Protected
-     * @body (multipart/form-data)
-     *   - images: File[] (batch images)
-     *   - data: JSON stringified object matching the BatchDto type
-     *     {
-     *       "productId": int,
-     *       "qty": int,
-     *       "cost": double,
-     *       "price": double,
-     *       "sizeId": int,
-     *       "desc": string
-     *     }
+     * @body (multipart / form - data)
+     * - images: File[] (batch images)
+     * - data: JSON stringified object matching the BatchDto type
+     * {
+     * "productId": int,
+     * "qty": int,
+     * "cost": double,
+     * "price": double,
+     * "sizeId": int,
+     * "desc": string
+     * }
      * @response 201: { "message": "Batch updated successfully with id: ..." }
-     *           400: { "message": "Validation error", "data": { ...fields } }
-     *           500: { "message": "Internal server error", "error": "..." }
+     * 400: { "message": "Validation error", "data": { ...fields } }
+     * 500: { "message": "Internal server error", "error": "..." }
      */
     @PostMapping("/set-stock")
-    private ResponseEntity<?> setStock(@RequestPart(value = "data", required = true) String data,
+    private ResponseEntity<?> setStock(@RequestPart(value = "data") String data,
                                        @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                        @RequestHeader(value = "Authorization") String token) {
 
@@ -89,23 +89,50 @@ public class BatchesController {
      * @route DELETE /api/batches/delete-batch/{id}
      * @description Delete batch by ID
      * @access Protected
-     * @params
-     *   - id: number (required)
-     * @response
-     *   {
-     *     "status": 200,
-     *     "message": "Batch deleted successfully"
-     *   }
-     *   If related order items exist: { "status": 409, "message": "Cannot delete batch: related order items exist" }
-     *   If not found: { "status": 404, "message": "Batch not found" }
-     *   If error: { "status": 500, "message": "Internal server error", "error": "..." }
+     * @params - id: number (required)
+     * @response {
+     * "status": 200,
+     * "message": "Batch deleted successfully"
+     * }
+     * If related order items exist: { "status": 409, "message": "Cannot delete batch: related order items exist" }
+     * If not found: { "status": 404, "message": "Batch not found" }
+     * If error: { "status": 500, "message": "Internal server error", "error": "..." }
      */
     @DeleteMapping("/delete-batch/{id}")
     public ResponseEntity<?> deleteBatch(@PathVariable Integer id) {
         try {
             return batchService.deleteBatch(id);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error", "error", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error"));
+        }
+    }
+
+    /**
+     * @route GET /api/batches/{product_id}
+     * @description Get all batch details by product id
+     * @access Protected
+     */
+    @GetMapping("/{product_id}")
+    public ResponseEntity<?> getBatchesByProductId(@PathVariable("product_id") Integer productId) {
+        try {
+            return batchService.getBatchesByProductId(productId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error"));
+        }
+    }
+
+    /**
+     * @route GET /api/batch/{batch_id}
+     * @description Get batch details by batch id including foreign key data
+     * @access Protected
+     */
+    @GetMapping("/batch/{batch_id}")
+    public ResponseEntity<?> getBatchById(@PathVariable("batch_id") Integer batchId) {
+        try {
+            return batchService.getBatchById(batchId);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error"));
         }
     }
 }
