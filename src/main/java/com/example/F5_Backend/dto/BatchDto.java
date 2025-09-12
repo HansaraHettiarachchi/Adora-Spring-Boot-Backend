@@ -24,10 +24,10 @@ public class BatchDto implements Serializable {
     @NotNull
     Double cost;
     String desc;
-    @NotNull
-    ProductDto product;
-    @NotNull
-    SizeDto size;
+//    @NotNull
+//    ProductDto product;
+//    @NotNull
+//    SizeDto size;
     @NotNull
     @Size(max = 30)
     String code;

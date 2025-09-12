@@ -19,7 +19,7 @@ public class GrnItem {
     private Integer id;
 
     @NotNull
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = true)
     private Double price;
 
     @NotNull

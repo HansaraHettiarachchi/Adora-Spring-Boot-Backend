@@ -5,10 +5,7 @@ import com.example.F5_Backend.service.BatchService;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -22,8 +19,30 @@ public class BatchesController {
     private final Gson gson;
     private final BatchService batchService;
 
+    /**
+     * @route POST /api/batches/set-stock
+     * @description Set or update stock (batch)
+     * @access Protected
+     * @body (multipart/form-data)
+     *   - images: File[] (batch images)
+     *   - data: JSON stringified object matching the BatchDto type
+     *     {
+     *       "productId": int,
+     *       "qty": int,
+     *       "cost": double,
+     *       "price": double,
+     *       "sizeId": int,
+     *       "desc": string
+     *     }
+     * @response 201: { "message": "Batch updated successfully with id: ..." }
+     *           400: { "message": "Validation error", "data": { ...fields } }
+     *           500: { "message": "Internal server error", "error": "..." }
+     */
     @PostMapping("/set-stock")
-    private ResponseEntity<?> setStock(@RequestPart(value = "data", required = true) String data, @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+    private ResponseEntity<?> setStock(@RequestPart(value = "data", required = true) String data,
+                                       @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                       @RequestHeader(value = "Authorization") String token) {
+
         BatchDto batchDto = gson.fromJson(data, BatchDto.class);
 
         Map<String, String> errors = validateBatch(batchDto);
@@ -31,7 +50,7 @@ public class BatchesController {
             return ResponseEntity.status(211).body(errors);
         }
 
-        return batchService.setBatch(batchDto, images);
+        return batchService.setBatch(batchDto, images, token);
     }
 
     private Map<String, String> validateBatch(BatchDto batchDto) {
@@ -64,5 +83,29 @@ public class BatchesController {
         }
 
         return errors;
+    }
+
+    /**
+     * @route DELETE /api/batches/delete-batch/{id}
+     * @description Delete batch by ID
+     * @access Protected
+     * @params
+     *   - id: number (required)
+     * @response
+     *   {
+     *     "status": 200,
+     *     "message": "Batch deleted successfully"
+     *   }
+     *   If related order items exist: { "status": 409, "message": "Cannot delete batch: related order items exist" }
+     *   If not found: { "status": 404, "message": "Batch not found" }
+     *   If error: { "status": 500, "message": "Internal server error", "error": "..." }
+     */
+    @DeleteMapping("/delete-batch/{id}")
+    public ResponseEntity<?> deleteBatch(@PathVariable Integer id) {
+        try {
+            return batchService.deleteBatch(id);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("status", 500, "message", "Internal server error", "error", e.getMessage()));
+        }
     }
 }

@@ -20,6 +20,17 @@ public class UserController {
     private final UserService userService;
     private final Gson gson;
 
+    /**
+     * @route POST /api/users/update-user
+     * @description Update user details (with optional profile image)
+     * @access Protected
+     * @body (multipart/form-data)
+     *   - data: JSON stringified object matching UsersDto
+     *   - image: File (optional profile image)
+     * @response 200: { "message": "User updated successfully" }
+     *           400: { "message": "Validation error", "data": { ...fields } }
+     *           404: { "message": "User not found" }
+     */
     @PostMapping("/update-user")
     public ResponseEntity<?> updateUser(@RequestParam(value = "data") String data, @RequestParam(value = "image", required = false) MultipartFile image) {
         UsersDto usersDto = gson.fromJson(data, UsersDto.class);
@@ -32,16 +43,39 @@ public class UserController {
         return userService.updateUser(usersDto, image);
     }
 
+    /**
+     * @route GET /api/users/get-all-cities
+     * @description Get all cities (optionally filtered by ID)
+     * @access Public
+     * @queryParam id: int (optional)
+     * @response 200: CityDto[] or CityDto
+     */
     @GetMapping("/get-all-cities")
     public ResponseEntity<?> getAllCities(@RequestParam(value = "id", required = false) Integer id) {
         return userService.getAllCities(id);
     }
 
+    /**
+     * @route GET /api/users/get-all-genders
+     * @description Get all genders (optionally filtered by ID)
+     * @access Public
+     * @queryParam id: int (optional)
+     * @response 200: GenderDto[] or GenderDto
+     */
     @GetMapping("/get-all-genders")
     public ResponseEntity<?> getAllGenders(@RequestParam(value = "id", required = false) Integer id) {
         return userService.getAllGender(id);
     }
 
+    /**
+     * @route POST /api/users/set-user
+     * @description Register a new user
+     * @access Public
+     * @body { "fname": string, "lname": string, "address": string, "nic": string, "email": string, "password": string, "mobile": string, "gender_id": int, "city_id": int }
+     * @response 201: { "message": "User registration successful" }
+     *           400: { "message": "Validation error", "data": { ...fields } }
+     *           409: { "message": "Email/Mobile/NIC already exists" }
+     */
     @PostMapping("/set-user")
     public ResponseEntity<?> addUser(@RequestBody UsersDto usersDto) {
         Map<String, String> errors = validateUserDto(usersDto);

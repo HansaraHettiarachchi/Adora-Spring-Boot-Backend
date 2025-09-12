@@ -19,6 +19,14 @@ public class AuthController {
     @Autowired
     private UsersRepo usersRepo;
 
+    /**
+     * @route POST /api/auth/login
+     * @description Authenticate user and return JWT token
+     * @access Public
+     * @body { "email": string, "password": string }
+     * @response { "token": string } on success
+     *           { "status": 401, "message": "Invalid credentials" } on error
+     */
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");

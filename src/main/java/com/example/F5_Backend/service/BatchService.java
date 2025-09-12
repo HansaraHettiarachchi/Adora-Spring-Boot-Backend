@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface BatchService {
 
-    ResponseEntity<?> setBatch(BatchDto batchDto, List<MultipartFile> images);
+    ResponseEntity<?> setBatch(BatchDto batchDto, List<MultipartFile> images, String token);
+
+    ResponseEntity<?> deleteBatch(Integer id);
 }
