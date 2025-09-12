@@ -4,5 +4,6 @@ import com.example.F5_Backend.entities.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SupplierRepo extends JpaRepository<Supplier, Integer> {
+    boolean existsByEmail(String email);
+    boolean existsByMobile(String mobile);
 }
-

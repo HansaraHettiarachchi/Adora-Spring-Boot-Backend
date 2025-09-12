@@ -18,3 +18,4 @@ public interface ProductService {
 
     ResponseEntity<?> updateProduct(ProductDto productDto);
 }
+
