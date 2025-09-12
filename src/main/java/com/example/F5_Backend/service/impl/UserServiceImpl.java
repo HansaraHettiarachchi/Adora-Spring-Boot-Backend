@@ -38,6 +38,22 @@ public class UserServiceImpl implements UserService {
     private String relativePath;
 
     @Override
+    public ResponseEntity<?> getAllCities(Integer id) {
+        if (id != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(cityRepo.findById(id).orElse(null));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(cityRepo.findAll());
+    }
+
+    @Override
+    public ResponseEntity<?> getAllGender(Integer id) {
+        if (id != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(genderRepo.findById(id).orElse(null));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(cityRepo.findAll());
+    }
+
+    @Override
     public ResponseEntity<?> setUser(UsersDto usersDto) {
         Map<String, String> errors = new HashMap<>();
 
@@ -52,13 +68,13 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!errors.isEmpty()) {
-            return ResponseEntity.badRequest().body(errors);
+            return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(errors);
         }
 
         Users users = modelMapper.map(usersDto, Users.class);
         users.setCity(cityRepo.findById(usersDto.getCity_id()).orElseThrow(() -> new RuntimeException("City not found")));
         users.setGender(genderRepo.findById(usersDto.getGender_id()).orElseThrow(() -> new RuntimeException("Gender not found")));
-        users.setUserRole(userRoleRepo.findById(3).orElseThrow(() -> new RuntimeException("User Role not found")));
+        users.setUserRole(userRoleRepo.findById(4).orElseThrow(() -> new RuntimeException("User Role not found")));
         users.setStatus(statusRepo.findById(1).orElseThrow(() -> new RuntimeException("Status not found")));
 
         users.setPassword(PasswordUtil.hashPassword(usersDto.getPassword()));
@@ -66,17 +82,6 @@ public class UserServiceImpl implements UserService {
         usersRepo.save(users);
         String token = JwtUtil.createAccessToken(users);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "User registration successful"));
-    }
-
-    @Override
-    public ResponseEntity<?> login(UsersDto usersDto) {
-        Users users = usersRepo.findByEmail(usersDto.getEmail()).orElse(null);
-        if (users != null && PasswordUtil.checkPassword(usersDto.getPassword(), users.getPassword())) {
-            String token = JwtUtil.createAccessToken(users);
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "User login successful", "token", token));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
-        }
     }
 
     public ResponseEntity<?> updateUser(UsersDto usersDto, MultipartFile image) {
@@ -108,15 +113,22 @@ public class UserServiceImpl implements UserService {
         user.setGender(genderRepo.findById(usersDto.getGender_id()).get());
         user.setCity(cityRepo.findById(usersDto.getCity_id()).get());
 
-        String imagePath = null;
+        String imagePath = user.getPImg();
         try {
             if (image != null && !image.isEmpty()) {
+
+                if (imagePath != null && !imagePath.isEmpty()) {
+                    String oldImagePath = relativePath + imagePath.replace("/uploads", "");
+                    File oldImageFile = new File(oldImagePath);
+                    if (oldImageFile.exists()) {
+                        oldImageFile.delete();
+                    }
+                }
                 String fileName = "user_" + usersDto.getId() + "_" + System.currentTimeMillis() + "_" + image.getOriginalFilename();
                 imagePath = saveImage(image, fileName);
                 user.setPImg(imagePath);
             }
         } catch (IOException e) {
-            System.err.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image");
         }
 
@@ -127,7 +139,7 @@ public class UserServiceImpl implements UserService {
 
     private String saveImage(MultipartFile image, String fileName) throws IOException {
 
-        File directory = new File(relativePath);
+        File directory = new File(relativePath + "/images/profileImages/");
 
         if (!directory.exists()) {
             directory.mkdirs();
@@ -136,7 +148,7 @@ public class UserServiceImpl implements UserService {
         File destinationFile = new File(directory, fileName);
         image.transferTo(destinationFile);
 
-        return "/uploads/f5_backend/profileImages/" + fileName;
+        return "/uploads/images/profileImages/" + fileName;
     }
 
 }

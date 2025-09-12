@@ -3,15 +3,19 @@ package com.example.F5_Backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Setter;
 import lombok.Value;
+import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 
 /**
  * DTO for {@link com.example.F5_Backend.entities.Users}
  */
-@Value
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UsersDto implements Serializable {
     Integer id;
     @NotNull

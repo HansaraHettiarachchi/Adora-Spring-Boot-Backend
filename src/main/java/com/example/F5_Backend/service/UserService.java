@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
-    public ResponseEntity<?> setUser(UsersDto usersDto);
+    ResponseEntity<?> setUser(UsersDto usersDto);
 
-    public ResponseEntity<?> login(UsersDto usersDto);
+    ResponseEntity<?> updateUser(UsersDto usersDto, MultipartFile image);
 
-    public ResponseEntity<?> updateUser(UsersDto usersDto, MultipartFile image);
+    ResponseEntity<?> getAllCities(Integer id);
+
+    ResponseEntity<?> getAllGender(Integer id);
 }

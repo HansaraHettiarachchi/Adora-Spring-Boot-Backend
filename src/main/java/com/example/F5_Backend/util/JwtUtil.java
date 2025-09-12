@@ -4,16 +4,20 @@ import com.example.F5_Backend.entities.Users;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
 
+@Component
 public class JwtUtil {
 
-    private static final String SECRET = "S3cr3tXxYzAbCDefGhIjKlMnOpQrStUvWxYz0123456=";
-    private static final SecretKey KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
     private static final long EXPIRATION_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+    private static SecretKey KEY;
+    private static String SECRET;
+//    private static final SecretKey KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
 
     public static String createAccessToken(Users user) {
         Date now = new Date();
@@ -56,7 +60,6 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
-
     public static boolean validateToken(String token, Long expectedUserId) {
         try {
             Claims claims = parse(token).getBody();
@@ -64,5 +67,14 @@ public class JwtUtil {
         } catch (JwtException e) {
             return false;
         }
+    }
+
+    @Value("${app.jwt.secret}")
+    public void setSecret(String secret) {
+        if (SECRET != null) {
+            return;
+        }
+        JwtUtil.SECRET = secret;
+        JwtUtil.KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 }

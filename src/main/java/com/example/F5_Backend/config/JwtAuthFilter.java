@@ -24,8 +24,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/users/set-user",
-            "/api/auth/login"
-    );
+            "/api/auth/login",
+            "/api/users/get-all-cities",
+            "/api/users/get-all-genders"
+            );
 
     @Autowired
     CustomUserDetailsService userDetailsService;

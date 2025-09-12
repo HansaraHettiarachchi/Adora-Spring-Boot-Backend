@@ -32,6 +32,15 @@ public class UserController {
         return userService.updateUser(usersDto, image);
     }
 
+    @GetMapping("/get-all-cities")
+    public ResponseEntity<?> getAllCities(@RequestParam(value = "id", required = false) Integer id) {
+        return userService.getAllCities(id);
+    }
+
+    @GetMapping("/get-all-genders")
+    public ResponseEntity<?> getAllGenders(@RequestParam(value = "id", required = false) Integer id) {
+        return userService.getAllGender(id);
+    }
 
     @PostMapping("/set-user")
     public ResponseEntity<?> addUser(@RequestBody UsersDto usersDto) {
