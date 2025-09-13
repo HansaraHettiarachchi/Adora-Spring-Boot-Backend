@@ -1,6 +1,7 @@
 package com.example.F5_Backend.controller;
 
 import com.example.F5_Backend.dto.ProductDto;
+import com.example.F5_Backend.dto.SizeDto;
 import com.example.F5_Backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -86,6 +87,58 @@ public class ProductController {
     @GetMapping("/get-all-mother-plant-type")
     public ResponseEntity<?> getAllMotherPlantType(@RequestParam(required = false) List<Integer> ids) {
         return ResponseEntity.ok().body(productService.getMotherPlantTypes(ids));
+    }
+
+    /**
+     * @route POST /api/products/set-size
+     * @description Create a new size
+     * @body { "size": string, "shortKey": string }
+     * @response 201: { id, size, shortKey }
+     *           400: { message: "Validation error" }
+     *           409: { message: "Size already exists or constraint violation" }
+     */
+    @PostMapping("/set-size")
+    public ResponseEntity<?> setSize(@RequestBody SizeDto sizeDto) {
+        if (sizeDto.getSize() == null || sizeDto.getSize().trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("message", "Size cannot be empty"));
+        }
+        if (sizeDto.getShortKey() == null || sizeDto.getShortKey().trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("message", "Short key cannot be empty"));
+        }
+        return productService.setSize(sizeDto);
+    }
+
+    /**
+     * @route GET /api/products/get-all-size
+     * @description Get all sizes
+     * @response 200: [ { id, size, shortKey } ]
+     */
+    @GetMapping("/get-all-size")
+    public ResponseEntity<?> getAllSize() {
+        return ResponseEntity.ok(productService.getAllSizes());
+    }
+
+    /**
+     * @route GET /api/products/get-size-by-id/{id}
+     * @description Get size by ID
+     * @response 200: { id, size, shortKey }
+     *           404: { message: "Size not found" }
+     */
+    @GetMapping("/get-size-by-id/{id}")
+    public ResponseEntity<?> getSizeById(@PathVariable Integer id) {
+        return productService.getSizeById(id);
+    }
+
+    /**
+     * @route DELETE /api/products/delete-size/{id}
+     * @description Delete size by ID
+     * @response 200: { message: "Size deleted successfully" }
+     *           404: { message: "Size not found" }
+     *           409: { message: "Cannot delete size due to foreign key constraint" }
+     */
+    @DeleteMapping("/delete-size/{id}")
+    public ResponseEntity<?> deleteSize(@PathVariable Integer id) {
+        return productService.deleteSize(id);
     }
 
     private Map<String, String> validateProduct(ProductDto productDto) {

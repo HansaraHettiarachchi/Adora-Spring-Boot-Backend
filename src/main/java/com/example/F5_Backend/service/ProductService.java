@@ -3,6 +3,7 @@ package com.example.F5_Backend.service;
 import com.example.F5_Backend.dto.CategoryDto;
 import com.example.F5_Backend.dto.MotherPlantTypeDto;
 import com.example.F5_Backend.dto.ProductDto;
+import com.example.F5_Backend.dto.SizeDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,12 @@ public interface ProductService {
     List<CategoryDto> getCategories(List<Integer> id);
 
     ResponseEntity<?> updateProduct(ProductDto productDto);
-}
 
+    ResponseEntity<?> setSize(SizeDto sizeDto);
+
+    List<SizeDto> getAllSizes();
+
+    ResponseEntity<?> getSizeById(Integer id);
+
+    ResponseEntity<?> deleteSize(Integer id);
+}

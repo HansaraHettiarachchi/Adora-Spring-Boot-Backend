@@ -3,16 +3,20 @@ package com.example.F5_Backend.service.impl;
 import com.example.F5_Backend.dto.CategoryDto;
 import com.example.F5_Backend.dto.MotherPlantTypeDto;
 import com.example.F5_Backend.dto.ProductDto;
+import com.example.F5_Backend.dto.SizeDto;
 import com.example.F5_Backend.entities.Category;
 import com.example.F5_Backend.entities.MotherPlantType;
 import com.example.F5_Backend.entities.Product;
+import com.example.F5_Backend.entities.Size;
 import com.example.F5_Backend.repo.CategoryRepo;
 import com.example.F5_Backend.repo.MotherPlantTypeRepo;
 import com.example.F5_Backend.repo.ProductRepo;
+import com.example.F5_Backend.repo.SizeRepo;
 import com.example.F5_Backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
     private final MotherPlantTypeRepo motherPlantTypeRepo;
     private final CategoryRepo categoryRepo;
+    private final SizeRepo sizeRepo;
 
     @Override
     public ResponseEntity<?> setProducts(ProductDto productDto) {
@@ -88,6 +93,55 @@ public class ProductServiceImpl implements ProductService {
 
         productRepo.save(existingProduct);
         return ResponseEntity.status(HttpStatus.OK).body("Product updated successfully with id: " + existingProduct.getId());
+    }
+
+    @Override
+    public ResponseEntity<?> setSize(SizeDto sizeDto) {
+        if (sizeDto.getSize() == null || sizeDto.getSize().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Size cannot be empty");
+        }
+        if (sizeDto.getShortKey() == null || sizeDto.getShortKey().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Short key cannot be empty");
+        }
+        Size size = modelMapper.map(sizeDto, Size.class);
+        try {
+            size = sizeRepo.save(size);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Size already exists or constraint violation");
+        }
+        SizeDto result = modelMapper.map(size, SizeDto.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @Override
+    public List<SizeDto> getAllSizes() {
+        List<Size> sizes = sizeRepo.findAll();
+        return modelMapper.map(sizes, new TypeToken<List<SizeDto>>() {
+        }.getType());
+    }
+
+    @Override
+    public ResponseEntity<?> getSizeById(Integer id) {
+        Size size = sizeRepo.findById(id).orElse(null);
+        if (size == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Size not found");
+        }
+        SizeDto result = modelMapper.map(size, SizeDto.class);
+        return ResponseEntity.ok(result);
+    }
+
+    @Override
+    public ResponseEntity<?> deleteSize(Integer id) {
+        Size size = sizeRepo.findById(id).orElse(null);
+        if (size == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Size not found");
+        }
+        try {
+            sizeRepo.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete size due to foreign key constraint");
+        }
+        return ResponseEntity.ok("Size deleted successfully");
     }
 
 }
