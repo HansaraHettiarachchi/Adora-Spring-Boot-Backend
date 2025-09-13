@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -200,6 +201,36 @@ public class ProductServiceImpl implements ProductService {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete category due to foreign key constraint");
         }
         return ResponseEntity.ok("Category deleted successfully");
+    }
+
+    @Override
+    public List<ProductDto> getAllProducts() {
+        List<Product> products = productRepo.findAll();
+        return modelMapper.map(products, new TypeToken<List<ProductDto>>() {
+        }.getType());
+    }
+
+    @Override
+    public ResponseEntity<?> getProductById(Integer id) {
+        if (id == null || id <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", 400, "message", "Invalid product ID", "data", null));
+        }
+        Product product = productRepo.findById(id).orElse(null);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", "Product not found", "data", null));
+        }
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        return ResponseEntity.ok(Map.of("status", 200, "data", productDto));
+    }
+
+    @Override
+    public ResponseEntity<?> deleteProduct(Integer id) {
+        Product product = productRepo.findById(id).orElse(null);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", "Product not found"));
+        }
+        productRepo.deleteById(id);
+        return ResponseEntity.ok(Map.of("status", 200, "message", "Product deleted successfully"));
     }
 
 }

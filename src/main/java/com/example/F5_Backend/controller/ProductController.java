@@ -199,6 +199,40 @@ public class ProductController {
         return productService.deleteCategory(id);
     }
 
+    /**
+     * @route GET /api/products/get-all-products
+     * @description Get all products
+     * @response 200: { status: 200, data: [ ...ProductDto ] }
+     */
+    @GetMapping("/get-all-products")
+    public ResponseEntity<?> getAllProducts() {
+        List<ProductDto> products = productService.getAllProducts();
+        return ResponseEntity.ok(Map.of("status", 200, "data", products));
+    }
+
+    /**
+     * @route GET /api/products/get-product-by-id/{id}
+     * @description Get product by ID
+     * @response 200: { status: 200, data: ProductDto }
+     *           400: { status: 400, message: "Invalid product ID", data: null }
+     *           404: { status: 404, message: "Product not found", data: null }
+     */
+    @GetMapping("/get-product-by-id/{id}")
+    public ResponseEntity<?> getProductById(@PathVariable Integer id) {
+        return productService.getProductById(id);
+    }
+
+    /**
+     * @route DELETE /api/products/delete-product/{id}
+     * @description Delete product by ID
+     * @response 200: { status: 200, message: "Product deleted successfully" }
+     *           404: { status: 404, message: "Product not found" }
+     */
+    @DeleteMapping("/delete-product/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
+        return productService.deleteProduct(id);
+    }
+
     private Map<String, String> validateProduct(ProductDto productDto) {
         Map<String, String> errors = new HashMap<>();
 

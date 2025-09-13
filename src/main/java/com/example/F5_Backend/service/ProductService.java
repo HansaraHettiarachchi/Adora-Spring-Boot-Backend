@@ -34,4 +34,8 @@ public interface ProductService {
     ResponseEntity<?> setCategory(CategoryDto dto);
 
     ResponseEntity<?> deleteCategory(Integer id);
+
+    List<ProductDto> getAllProducts();
+    ResponseEntity<?> getProductById(Integer id);
+    ResponseEntity<?> deleteProduct(Integer id);
 }
