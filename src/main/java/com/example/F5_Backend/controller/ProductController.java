@@ -3,6 +3,7 @@ package com.example.F5_Backend.controller;
 import com.example.F5_Backend.dto.ProductDto;
 import com.example.F5_Backend.dto.SizeDto;
 import com.example.F5_Backend.dto.MotherPlantTypeDto;
+import com.example.F5_Backend.dto.CategoryDto;
 import com.example.F5_Backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -168,6 +169,34 @@ public class ProductController {
     @DeleteMapping("/delete-mother-plant-type/{id}")
     public ResponseEntity<?> deleteMotherPlantType(@PathVariable Integer id) {
         return productService.deleteMotherPlantType(id);
+    }
+
+    /**
+     * @route POST /api/products/set-category
+     * @description Create a new category
+     * @body { "name": string }
+     * @response 201: { id, name }
+     *           400: { message: "Category name cannot be empty" }
+     *           409: { message: "Category already exists or constraint violation" }
+     */
+    @PostMapping("/set-category")
+    public ResponseEntity<?> setCategory(@RequestBody CategoryDto dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("message", "Category name cannot be empty"));
+        }
+        return productService.setCategory(dto);
+    }
+
+    /**
+     * @route DELETE /api/products/delete-category/{id}
+     * @description Delete category by ID
+     * @response 200: { message: "Category deleted successfully" }
+     *           404: { message: "Category not found" }
+     *           409: { message: "Cannot delete category due to foreign key constraint" }
+     */
+    @DeleteMapping("/delete-category/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable Integer id) {
+        return productService.deleteCategory(id);
     }
 
     private Map<String, String> validateProduct(ProductDto productDto) {

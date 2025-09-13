@@ -30,4 +30,8 @@ public interface ProductService {
     ResponseEntity<?> setMotherPlantType(MotherPlantTypeDto dto);
 
     ResponseEntity<?> deleteMotherPlantType(Integer id);
+
+    ResponseEntity<?> setCategory(CategoryDto dto);
+
+    ResponseEntity<?> deleteCategory(Integer id);
 }
