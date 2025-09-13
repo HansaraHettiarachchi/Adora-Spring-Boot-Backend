@@ -2,6 +2,7 @@ package com.example.F5_Backend.controller;
 
 import com.example.F5_Backend.dto.ProductDto;
 import com.example.F5_Backend.dto.SizeDto;
+import com.example.F5_Backend.dto.MotherPlantTypeDto;
 import com.example.F5_Backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -139,6 +140,34 @@ public class ProductController {
     @DeleteMapping("/delete-size/{id}")
     public ResponseEntity<?> deleteSize(@PathVariable Integer id) {
         return productService.deleteSize(id);
+    }
+
+    /**
+     * @route POST /api/products/set-mother-plant-type
+     * @description Create a new mother plant type
+     * @body { "name": string }
+     * @response 201: { id, name }
+     *           400: { message: "Mother plant type name cannot be empty" }
+     *           409: { message: "Mother plant type already exists or constraint violation" }
+     */
+    @PostMapping("/set-mother-plant-type")
+    public ResponseEntity<?> setMotherPlantType(@RequestBody MotherPlantTypeDto dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("message", "Mother plant type name cannot be empty"));
+        }
+        return productService.setMotherPlantType(dto);
+    }
+
+    /**
+     * @route DELETE /api/products/delete-mother-plant-type/{id}
+     * @description Delete mother plant type by ID
+     * @response 200: { message: "Mother plant type deleted successfully" }
+     *           404: { message: "Mother plant type not found" }
+     *           409: { message: "Cannot delete mother plant type due to foreign key constraint" }
+     */
+    @DeleteMapping("/delete-mother-plant-type/{id}")
+    public ResponseEntity<?> deleteMotherPlantType(@PathVariable Integer id) {
+        return productService.deleteMotherPlantType(id);
     }
 
     private Map<String, String> validateProduct(ProductDto productDto) {

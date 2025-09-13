@@ -144,4 +144,33 @@ public class ProductServiceImpl implements ProductService {
         return ResponseEntity.ok("Size deleted successfully");
     }
 
+    @Override
+    public ResponseEntity<?> setMotherPlantType(MotherPlantTypeDto dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mother plant type name cannot be empty");
+        }
+        MotherPlantType entity = modelMapper.map(dto, MotherPlantType.class);
+        try {
+            entity = motherPlantTypeRepo.save(entity);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Mother plant type already exists or constraint violation");
+        }
+        MotherPlantTypeDto result = modelMapper.map(entity, MotherPlantTypeDto.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @Override
+    public ResponseEntity<?> deleteMotherPlantType(Integer id) {
+        MotherPlantType entity = motherPlantTypeRepo.findById(id).orElse(null);
+        if (entity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mother plant type not found");
+        }
+        try {
+            motherPlantTypeRepo.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete mother plant type due to foreign key constraint");
+        }
+        return ResponseEntity.ok("Mother plant type deleted successfully");
+    }
+
 }

@@ -26,4 +26,8 @@ public interface ProductService {
     ResponseEntity<?> getSizeById(Integer id);
 
     ResponseEntity<?> deleteSize(Integer id);
+
+    ResponseEntity<?> setMotherPlantType(MotherPlantTypeDto dto);
+
+    ResponseEntity<?> deleteMotherPlantType(Integer id);
 }
