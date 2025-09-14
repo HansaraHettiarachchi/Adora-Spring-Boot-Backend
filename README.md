@@ -1,10 +1,6 @@
 
 # API Documentation — Adora Spring Boot Backend
 
-> **Note:** I attempted to read your repository at `https://github.com/HansaraHettiarachchi/Adora-Spring-Boot-Backend` but could not load the code automatically.  
-> The section below is a fully-formed, developer-friendly **API documentation template** tailored for a typical Spring Boot + JWT backend (Authentication, Users, Products, Categories, Orders, Admin).  
-> **Action for you:** Replace placeholder paths, request/response examples and notes with the concrete details from your controller classes. If you prefer, upload the repository or paste the controller files and I will generate a concrete, end-to-end README section using actual code.
-
 ---
 
 ## Table of contents
@@ -456,15 +452,3 @@ Authorization: Bearer <token>
 4. If you want, re-run the helper to generate a fully concrete README: upload the code (controllers) here and I will produce the finished section.
 
 ---
-
-## Quick checklist for finishing the doc
-- [ ] Replace placeholders with exact paths and DTO fields.
-- [ ] Add real sample request/response payloads copied from controller DTOs.
-- [ ] Confirm headers (CORS, custom headers).
-- [ ] Document validation rules for request fields.
-- [ ] Document any file upload endpoints (multipart/form-data).
-- [ ] Add examples of curl requests for common flows (login, create product, place order).
-
----
-
-_End of API Documentation section._
