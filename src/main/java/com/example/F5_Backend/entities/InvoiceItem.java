@@ -7,9 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
 @Entity(name = "InvoiceItem")
 @Table(name = "invoice_items")
 public class InvoiceItem {

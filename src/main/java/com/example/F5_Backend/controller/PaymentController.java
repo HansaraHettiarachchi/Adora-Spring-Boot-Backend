@@ -31,7 +31,7 @@ public class PaymentController {
     private Map<String, String> validateInvoiceDto(InvoiceDto invoiceDto) {
         Map<String, String> errors = new HashMap<>();
 
-        if (invoiceDto.getTotal() == null || invoiceDto.getTotal().doubleValue() < 0) {
+        if (invoiceDto.getTotal() == null || invoiceDto.getTotal() < 0) {
             errors.put("total", "Total must be a positive value.");
         }
         if (invoiceDto.getQty() == null || invoiceDto.getQty() <= 0) {
@@ -40,7 +40,7 @@ public class PaymentController {
         if (invoiceDto.getDatetime() == null) {
             errors.put("datetime", "Datetime is required.");
         }
-        if (invoiceDto.getDiscount() != null && invoiceDto.getDiscount().doubleValue() < 0) {
+        if (invoiceDto.getDiscount() != null && invoiceDto.getDiscount() < 0) {
             errors.put("discount", "Discount cannot be negative.");
         }
         if (invoiceDto.getPayment_method_id() == null) {
