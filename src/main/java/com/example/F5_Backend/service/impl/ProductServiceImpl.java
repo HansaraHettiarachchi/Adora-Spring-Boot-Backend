@@ -214,11 +214,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ResponseEntity<?> getProductById(Integer id) {
         if (id == null || id <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", 400, "message", "Invalid product ID", "data", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", 400, "message", "Invalid product ID"));
         }
         Product product = productRepo.findById(id).orElse(null);
         if (product == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", "Product not found", "data", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", "Product not found"));
         }
         ProductDto productDto = modelMapper.map(product, ProductDto.class);
         return ResponseEntity.ok(Map.of("status", 200, "data", productDto));
