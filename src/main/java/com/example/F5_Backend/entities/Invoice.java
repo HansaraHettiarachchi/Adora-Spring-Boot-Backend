@@ -27,7 +27,7 @@ public class Invoice {
 
     @NotNull
     @Column(name = "qty", nullable = false)
-    private Double qty;
+    private Integer qty;
 
     @NotNull
     @Column(name = "datetime", nullable = false)

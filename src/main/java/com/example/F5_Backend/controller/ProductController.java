@@ -26,8 +26,8 @@ public class ProductController {
      * @access Protected
      * @body { "name": string, "desc": string, "categoryId": int, "motherPlantTypeId": int }
      * @response 201: { "message": "Product created successfully with id: ..." }
-     *           400: { "message": "Validation error", "data": { ...fields } }
-     *           409: { "message": "Product already exists with this name" }
+     * 400: { "message": "Validation error", "data": { ...fields } }
+     * 409: { "message": "Product already exists with this name" }
      */
     @PostMapping("/create-product")
     public ResponseEntity<?> createProduct(@RequestBody(required = false) ProductDto productDto) {
@@ -46,9 +46,9 @@ public class ProductController {
      * @access Protected
      * @body { "id": int, "name": string, "desc": string, "categoryId": int, "motherPlantTypeId": int }
      * @response 200: { "message": "Product updated successfully with id: ..." }
-     *           400: { "message": "Validation error", "data": { ...fields } }
-     *           404: { "message": "Product not found with id: ..." }
-     *           409: { "message": "Product already exists with this name" }
+     * 400: { "message": "Validation error", "data": { ...fields } }
+     * 404: { "message": "Product not found with id: ..." }
+     * 409: { "message": "Product already exists with this name" }
      */
     @PostMapping("/update-product")
     public ResponseEntity<?> updateProduct(@RequestBody(required = false) ProductDto productDto) {
@@ -65,6 +65,40 @@ public class ProductController {
 
 //        return ResponseEntity.ok().body(productDto);
         return productService.updateProduct(productDto);
+    }
+
+    /**
+     * @route GET /products
+     * @description Get paginated products, each with median price from batches.
+     * @queryParam page: number (required)
+     * @queryParam pageSize: number (required)
+     * @queryParam search: string (optional, matches product name, category name, or mother plant type name)
+     * @response 200: {
+     *   status: 200,
+     *   data: [
+     *     {
+     *       id: number,
+     *       name: string,
+     *       desc: string,
+     *       mother_plant_type_id: number,
+     *       category_id: number,
+     *       isActive: boolean,
+     *       price: number,
+     *       qty: number,
+     *       imageUrl: string
+     *     }
+     *   ],
+     *   pagination: {
+     *     page: number,
+     *     pageSize: number,
+     *     total: number
+     *   }
+     * }
+     * @response 500: { status: 500, message: "Internal server error", error: string }
+     */
+    @GetMapping("/products")
+    public ResponseEntity<?> getProducts(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String search) {
+        return productService.getProducts(page, pageSize, search);
     }
 
     /**
@@ -96,8 +130,8 @@ public class ProductController {
      * @description Create a new size
      * @body { "size": string, "shortKey": string }
      * @response 201: { id, size, shortKey }
-     *           400: { message: "Validation error" }
-     *           409: { message: "Size already exists or constraint violation" }
+     * 400: { message: "Validation error" }
+     * 409: { message: "Size already exists or constraint violation" }
      */
     @PostMapping("/set-size")
     public ResponseEntity<?> setSize(@RequestBody SizeDto sizeDto) {
@@ -124,7 +158,7 @@ public class ProductController {
      * @route GET /api/products/get-size-by-id/{id}
      * @description Get size by ID
      * @response 200: { id, size, shortKey }
-     *           404: { message: "Size not found" }
+     * 404: { message: "Size not found" }
      */
     @GetMapping("/get-size-by-id/{id}")
     public ResponseEntity<?> getSizeById(@PathVariable Integer id) {
@@ -135,8 +169,8 @@ public class ProductController {
      * @route DELETE /api/products/delete-size/{id}
      * @description Delete size by ID
      * @response 200: { message: "Size deleted successfully" }
-     *           404: { message: "Size not found" }
-     *           409: { message: "Cannot delete size due to foreign key constraint" }
+     * 404: { message: "Size not found" }
+     * 409: { message: "Cannot delete size due to foreign key constraint" }
      */
     @DeleteMapping("/delete-size/{id}")
     public ResponseEntity<?> deleteSize(@PathVariable Integer id) {
@@ -148,8 +182,8 @@ public class ProductController {
      * @description Create a new mother plant type
      * @body { "name": string }
      * @response 201: { id, name }
-     *           400: { message: "Mother plant type name cannot be empty" }
-     *           409: { message: "Mother plant type already exists or constraint violation" }
+     * 400: { message: "Mother plant type name cannot be empty" }
+     * 409: { message: "Mother plant type already exists or constraint violation" }
      */
     @PostMapping("/set-mother-plant-type")
     public ResponseEntity<?> setMotherPlantType(@RequestBody MotherPlantTypeDto dto) {
@@ -163,8 +197,8 @@ public class ProductController {
      * @route DELETE /api/products/delete-mother-plant-type/{id}
      * @description Delete mother plant type by ID
      * @response 200: { message: "Mother plant type deleted successfully" }
-     *           404: { message: "Mother plant type not found" }
-     *           409: { message: "Cannot delete mother plant type due to foreign key constraint" }
+     * 404: { message: "Mother plant type not found" }
+     * 409: { message: "Cannot delete mother plant type due to foreign key constraint" }
      */
     @DeleteMapping("/delete-mother-plant-type/{id}")
     public ResponseEntity<?> deleteMotherPlantType(@PathVariable Integer id) {
@@ -176,8 +210,8 @@ public class ProductController {
      * @description Create a new category
      * @body { "name": string }
      * @response 201: { id, name }
-     *           400: { message: "Category name cannot be empty" }
-     *           409: { message: "Category already exists or constraint violation" }
+     * 400: { message: "Category name cannot be empty" }
+     * 409: { message: "Category already exists or constraint violation" }
      */
     @PostMapping("/set-category")
     public ResponseEntity<?> setCategory(@RequestBody CategoryDto dto) {
@@ -191,8 +225,8 @@ public class ProductController {
      * @route DELETE /api/products/delete-category/{id}
      * @description Delete category by ID
      * @response 200: { message: "Category deleted successfully" }
-     *           404: { message: "Category not found" }
-     *           409: { message: "Cannot delete category due to foreign key constraint" }
+     * 404: { message: "Category not found" }
+     * 409: { message: "Cannot delete category due to foreign key constraint" }
      */
     @DeleteMapping("/delete-category/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Integer id) {
@@ -214,8 +248,8 @@ public class ProductController {
      * @route GET /api/products/get-product-by-id/{id}
      * @description Get product by ID
      * @response 200: { status: 200, data: ProductDto }
-     *           400: { status: 400, message: "Invalid product ID", data: null }
-     *           404: { status: 404, message: "Product not found", data: null }
+     * 400: { status: 400, message: "Invalid product ID", data: null }
+     * 404: { status: 404, message: "Product not found", data: null }
      */
     @GetMapping("/get-product-by-id/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Integer id) {
@@ -226,11 +260,24 @@ public class ProductController {
      * @route DELETE /api/products/delete-product/{id}
      * @description Delete product by ID
      * @response 200: { status: 200, message: "Product deleted successfully" }
-     *           404: { status: 404, message: "Product not found" }
+     * 404: { status: 404, message: "Product not found" }
      */
     @DeleteMapping("/delete-product/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
         return productService.deleteProduct(id);
+    }
+
+    /**
+     * @route GET /api/products/product-details/{id}
+     * @description Get detailed product info by product ID, including batches and images.
+     * @param id: number (required)
+     * @response 200: { status: 200, data: { ...product detail... } }
+     * 404: { status: 404, message: "Product not found", data: null }
+     * 500: { status: 500, message: "Internal server error", error: string }
+     */
+    @GetMapping("/product-details/{id}")
+    public ResponseEntity<?> getProductDetailById(@PathVariable Integer id) {
+        return productService.getProductDetailById(id);
     }
 
     private Map<String, String> validateProduct(ProductDto productDto) {

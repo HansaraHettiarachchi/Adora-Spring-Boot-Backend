@@ -5,7 +5,6 @@ import com.example.F5_Backend.dto.MotherPlantTypeDto;
 import com.example.F5_Backend.dto.ProductDto;
 import com.example.F5_Backend.dto.SizeDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -36,6 +35,12 @@ public interface ProductService {
     ResponseEntity<?> deleteCategory(Integer id);
 
     List<ProductDto> getAllProducts();
+
     ResponseEntity<?> getProductById(Integer id);
+
     ResponseEntity<?> deleteProduct(Integer id);
+
+    ResponseEntity<?> getProducts(Integer page, Integer size, String search);
+
+    ResponseEntity<?> getProductDetailById(Integer id);
 }

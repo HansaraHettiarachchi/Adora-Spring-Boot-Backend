@@ -4,23 +4,22 @@ import com.example.F5_Backend.dto.CategoryDto;
 import com.example.F5_Backend.dto.MotherPlantTypeDto;
 import com.example.F5_Backend.dto.ProductDto;
 import com.example.F5_Backend.dto.SizeDto;
-import com.example.F5_Backend.entities.Category;
-import com.example.F5_Backend.entities.MotherPlantType;
-import com.example.F5_Backend.entities.Product;
-import com.example.F5_Backend.entities.Size;
-import com.example.F5_Backend.repo.CategoryRepo;
-import com.example.F5_Backend.repo.MotherPlantTypeRepo;
-import com.example.F5_Backend.repo.ProductRepo;
-import com.example.F5_Backend.repo.SizeRepo;
+import com.example.F5_Backend.dto.responseDto.PaginatedResponse;
+import com.example.F5_Backend.entities.*;
+import com.example.F5_Backend.repo.*;
 import com.example.F5_Backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +32,8 @@ public class ProductServiceImpl implements ProductService {
     private final MotherPlantTypeRepo motherPlantTypeRepo;
     private final CategoryRepo categoryRepo;
     private final SizeRepo sizeRepo;
+    private final BatchRepo batchRepo;
+    private final ProductImagesRepo productImagesRepo;
 
     @Override
     public ResponseEntity<?> setProducts(ProductDto productDto) {
@@ -231,6 +232,143 @@ public class ProductServiceImpl implements ProductService {
         }
         productRepo.deleteById(id);
         return ResponseEntity.ok(Map.of("status", 200, "message", "Product deleted successfully"));
+    }
+
+    @Override
+    public ResponseEntity<?> getProducts(Integer page, Integer size, String search) {
+
+        List<Object> result = new ArrayList<>();
+        List<Product> products;
+        Page<Product> pagedProducts = null;
+
+        boolean isPaginated = (page != null && size != null);
+        boolean hasSearch = (search != null && !search.trim().isEmpty());
+
+        if (isPaginated) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            if (hasSearch) {
+                pagedProducts = productRepo.searchActiveProducts(true, search.trim(), pageRequest);
+            } else {
+                pagedProducts = productRepo.findByIsActive(true, pageRequest);
+            }
+            products = pagedProducts.getContent();
+        } else {
+            if (hasSearch) {
+                products = productRepo.searchActiveProducts(true, search.trim());
+            } else {
+                products = productRepo.findByIsActive(true);
+            }
+        }
+
+        for (Product product : products) {
+            HashMap<String, Object> data = new HashMap<>();
+
+            data.put("id", product.getId());
+            data.put("name", product.getName());
+            data.put("desc", product.getDesc());
+            data.put("mother_plant_type_id", product.getMotherPlantType() != null ? product.getMotherPlantType().getId() : null);
+            data.put("category_id", product.getCategory() != null ? product.getCategory().getId() : null);
+            data.put("isActive", product.getIsActive());
+
+            Batch batch = null;
+            if (product.getSelectedShowingBatchId() != null) {
+                batch = batchRepo.findById(product.getSelectedShowingBatchId()).orElse(null);
+            }
+            if (batch == null) {
+                batch = batchRepo.findDistinctFirstByProduct(product);
+
+                if (batch == null) {
+                    continue;
+                }
+            }
+
+            Integer totalQty = batchRepo.findTotalQtyOfProductId(product.getId());
+
+            data.put("price", batch != null ? batch.getPrice() : null);
+            data.put("qty", totalQty);
+            ProductImage productImage = (batch != null) ? productImagesRepo.findDistinctFirstByBatchId(batch.getId()) : null;
+            data.put("imageUrl", productImage != null ? productImage.getName() : null);
+
+            result.add(data);
+        }
+
+        PaginatedResponse.Pagination pagination = PaginatedResponse.Pagination.builder()
+                .page(isPaginated ? pagedProducts.getNumber() : 0)
+                .size(isPaginated ? pagedProducts.getSize() : result.size())
+                .matchCount(isPaginated ? pagedProducts.getNumberOfElements() : result.size())
+                .totalCount(isPaginated ? (int) pagedProducts.getTotalElements() : result.size())
+                .build();
+
+        PaginatedResponse paginatedResponse = PaginatedResponse.builder()
+                .status(200)
+                .data(result)
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity.ok(paginatedResponse);
+    }
+
+    @Override
+    public ResponseEntity<?> getProductDetailById(Integer id) {
+        try {
+            if (id == null || id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", 400, "message", "Invalid product ID", "data", null));
+            }
+            Product product = productRepo.findById(id).orElse(null);
+            if (product == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", "Product not found", "data", null));
+            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", product.getId());
+            data.put("name", product.getName());
+            data.put("desc", product.getDesc());
+            if (product.getMotherPlantType() != null) {
+                Map<String, Object> mpt = new HashMap<>();
+                mpt.put("id", product.getMotherPlantType().getId());
+                mpt.put("name", product.getMotherPlantType().getName());
+                data.put("mother_plant_type", mpt);
+            } else {
+                data.put("mother_plant_type", null);
+            }
+            if (product.getCategory() != null) {
+                Map<String, Object> cat = new HashMap<>();
+                cat.put("id", product.getCategory().getId());
+                cat.put("name", product.getCategory().getName());
+                data.put("category", cat);
+            } else {
+                data.put("category", null);
+            }
+            data.put("isActive", product.getIsActive());
+            // Batches
+            List<Batch> batches = batchRepo.findByProductId(product.getId());
+            List<Map<String, Object>> batchList = new ArrayList<>();
+            for (Batch batch : batches) {
+                Map<String, Object> batchMap = new HashMap<>();
+                batchMap.put("id", batch.getId());
+                batchMap.put("qty", batch.getQty());
+                batchMap.put("price", batch.getPrice());
+                batchMap.put("cost", batch.getCost());
+                batchMap.put("desc", batch.getDesc());
+                batchMap.put("size_id", batch.getSize() != null ? batch.getSize().getId() : null);
+                batchMap.put("code", batch.getCode());
+                // Images
+                List<ProductImage> images = productImagesRepo.findAllByBatch(batch);
+                List<Map<String, Object>> imageList = new ArrayList<>();
+                for (ProductImage img : images) {
+                    Map<String, Object> imgMap = new HashMap<>();
+                    imgMap.put("id", img.getId());
+                    imgMap.put("name", img.getName());
+                    imgMap.put("batch_id", batch.getId());
+                    imageList.add(imgMap);
+                }
+                batchMap.put("images", imageList);
+                batchList.add(batchMap);
+            }
+            data.put("batches", batchList);
+            return ResponseEntity.ok(Map.of("status", 200, "data", data));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("status", 500, "message", "Internal server error", "error", e.getMessage()));
+        }
     }
 
 }

@@ -1,9 +1,6 @@
 package com.example.F5_Backend.dto.responseDto;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
@@ -11,15 +8,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaginatedResponse {
+public class PaginatedResponse<T> {
     Pagination pagination;
     Integer status;
-    List<Object> data;
+    List<T> data;
 
-    static class Pagination {
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class Pagination {
         Integer page;
         Integer size;
-        Integer count;
+        Integer matchCount;
+        Integer totalCount;
     }
 }

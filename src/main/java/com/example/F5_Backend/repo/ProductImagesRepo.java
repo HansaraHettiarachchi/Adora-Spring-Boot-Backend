@@ -10,4 +10,6 @@ import java.util.List;
 
 public interface ProductImagesRepo extends JpaRepository<ProductImage, Integer> {
     List<ProductImage> findAllByBatch(Batch batch);
+
+    ProductImage findDistinctFirstByBatchId(Integer batchId);
 }

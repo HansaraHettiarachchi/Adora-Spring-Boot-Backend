@@ -9,9 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
 @Entity(name = "Product")
 @Table(name = "product")
 public class Product {
@@ -27,6 +25,8 @@ public class Product {
 
     @Column(name = "`desc`", columnDefinition = "TEXT")
     private String desc;
+
+    private Integer selectedShowingBatchId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -26,8 +26,7 @@ public class InvoiceItem {
     @Column(name = "cost", nullable = false)
     private Double cost;
 
-    @NotNull
-    @Column(name = "product_id", nullable = false)
+    @Column(name = "product_id")
     private Integer productId;
 
     @NotNull
